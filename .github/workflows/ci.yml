@@ -58,7 +58,7 @@ jobs:
         run: |
           python scripts/demo_moto_scan.py | grep -F 'Estimated monthly savings: $622.01'
       - name: Upload coverage
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: coverage-${{ matrix.os }}-py${{ matrix.python-version }}
           path: coverage-${{ matrix.os }}.xml

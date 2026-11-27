@@ -5,6 +5,11 @@ scan (or analyses a Cost Explorer CSV export), writes the Markdown report to the
 summary, uploads Markdown/HTML/JSON reports as an artifact and posts the report as a
 pull request comment. Re-runs edit the same comment instead of adding new ones.
 
+What has run on GitHub so far: `mode: csv` against the repository's synthetic CSV, on
+every push to `main` ([cost-report.yml](../.github/workflows/cost-report.yml)). The
+`scan` example below has never run against a real AWS account, and the pull request
+comment step has not run yet. There is no release tag, so the examples use `@main`.
+
 ## Live scan with an OIDC role
 
 ```yaml

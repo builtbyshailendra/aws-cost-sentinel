@@ -20,6 +20,10 @@ pull request.
   Cost Explorer exports, not a real bill, so the $1,302.11 below is a made-up number.
 - **The moto demo account is invented too**: one example of each kind of waste,
   seeded by `scripts/demo_moto_scan.py`.
+- **The GitHub Action has run on GitHub in CSV mode only**: the
+  [Cost report](.github/workflows/cost-report.yml) workflow runs it against the
+  synthetic CSV on every push to `main`, writing the job summary and a report artifact.
+  Its `scan` mode and its pull request comment have not run on GitHub yet.
 - The bundled price table approximates AWS's public us-east-1 list prices (table
   version `2025-06`); it has not been checked against a real invoice.
 - The test suite blocks every outbound network connection, so no test can reach AWS.
@@ -288,7 +292,8 @@ comment on the pull request:
 ```
 
 This repository dogfoods it in [.github/workflows/cost-report.yml](.github/workflows/cost-report.yml)
-against the bundled CSV.
+against the bundled CSV on every push to `main` and on pull requests. Only that CSV
+mode has run on GitHub; the `scan` example above and the pull request comment have not.
 
 ### As a library
 
