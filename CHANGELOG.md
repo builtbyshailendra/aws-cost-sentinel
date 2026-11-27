@@ -4,9 +4,9 @@ All notable changes to this project are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project uses
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## Unreleased
 
-## [0.1.0] - 2026-11-07
+## 0.1.0 - 2026-11-07 (not tagged as a release yet)
 
 ### Added
 
@@ -29,6 +29,3 @@ All notable changes to this project are documented here. The format follows
   report comment on the pull request.
 - CI on Ubuntu and Windows, multi-stage Dockerfile, architecture notes and ADRs 0001
   (bundled price table) and 0002 (pure checks over an inventory).
-
-[Unreleased]: https://github.com/builtbyshailendra/aws-cost-sentinel/compare/v0.1.0...HEAD
-[0.1.0]: https://github.com/builtbyshailendra/aws-cost-sentinel/releases/tag/v0.1.0
