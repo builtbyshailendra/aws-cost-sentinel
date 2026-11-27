@@ -1,0 +1,247 @@
+{
+  "schema_version": 1,
+  "generated_at": "2026-11-08T09:26:23.483022+00:00",
+  "source": "csv",
+  "source_detail": "examples/cost_explorer_by_service.csv",
+  "region": "global",
+  "summary": {
+    "finding_count": 3,
+    "estimated_monthly_savings": 1302.11,
+    "overlapping_savings_excluded": 0.0,
+    "by_confidence": {
+      "high": 0,
+      "medium": 1,
+      "low": 2
+    },
+    "by_check": [
+      {
+        "check_id": "savings-plan",
+        "title": "Savings Plan opportunity",
+        "findings": 1,
+        "estimated_monthly_savings": 851.02
+      },
+      {
+        "check_id": "spend-growth",
+        "title": "Services with unexplained spend growth",
+        "findings": 2,
+        "estimated_monthly_savings": 451.09
+      }
+    ],
+    "resources": {
+      "instances": 0,
+      "volumes": 0,
+      "snapshots": 0,
+      "elastic_ips": 0,
+      "load_balancers": 0,
+      "nat_gateways": 0,
+      "db_instances": 0,
+      "buckets": 0
+    }
+  },
+  "config": {
+    "region": "global",
+    "lookback_days": 14,
+    "months": 6,
+    "ec2_cpu_threshold": 5.0,
+    "ebs_unattached_min_age_days": 7,
+    "snapshot_max_age_days": 90,
+    "snapshot_incremental_ratio": 0.5,
+    "rds_connections_threshold": 1.0,
+    "rds_cpu_threshold": 5.0,
+    "nat_idle_gb_threshold": 1.0,
+    "nat_endpoint_savings_ratio": 0.3,
+    "s3_tierable_ratio": 0.3,
+    "savings_plan_discount": 0.2,
+    "savings_plan_min_uptime_days": 30,
+    "spend_growth_threshold": 0.25,
+    "min_savings": 0.0,
+    "checks": null
+  },
+  "errors": [],
+  "skipped_checks": {
+    "idle-ec2": "needs a resource inventory, which a Cost Explorer export does not have; run 'cost-sentinel scan' for this check",
+    "unattached-ebs": "needs a resource inventory, which a Cost Explorer export does not have; run 'cost-sentinel scan' for this check",
+    "old-snapshots": "needs a resource inventory, which a Cost Explorer export does not have; run 'cost-sentinel scan' for this check",
+    "unused-eip": "needs a resource inventory, which a Cost Explorer export does not have; run 'cost-sentinel scan' for this check",
+    "idle-load-balancer": "needs a resource inventory, which a Cost Explorer export does not have; run 'cost-sentinel scan' for this check",
+    "nat-gateway": "needs a resource inventory, which a Cost Explorer export does not have; run 'cost-sentinel scan' for this check",
+    "gp2-to-gp3": "needs a resource inventory, which a Cost Explorer export does not have; run 'cost-sentinel scan' for this check",
+    "idle-rds": "needs a resource inventory, which a Cost Explorer export does not have; run 'cost-sentinel scan' for this check",
+    "s3-lifecycle": "needs a resource inventory, which a Cost Explorer export does not have; run 'cost-sentinel scan' for this check"
+  },
+  "findings": [
+    {
+      "check_id": "savings-plan",
+      "title": "Savings Plan opportunity",
+      "resource_id": "EC2-Instances",
+      "resource_type": "savings-plan",
+      "region": "global",
+      "monthly_cost": 4255.1,
+      "estimated_monthly_savings": 851.02,
+      "confidence": "medium",
+      "reason": "EC2-Instances spend never dropped below $4,255.10 per month over the last 3 months, which looks like steady on-demand usage",
+      "recommendation": "Check Cost Explorer's Savings Plans recommendations and commit to the baseline with a 1-year, no-upfront Compute Savings Plan.",
+      "counted_in_total": true,
+      "details": {
+        "service": "EC2-Instances",
+        "months_considered": 3,
+        "baseline_monthly": 4255.1,
+        "discount": 0.2
+      }
+    },
+    {
+      "check_id": "spend-growth",
+      "title": "Services with unexplained spend growth",
+      "resource_id": "EC2-Other",
+      "resource_type": "cost-explorer:service",
+      "region": "global",
+      "monthly_cost": 1048.65,
+      "estimated_monthly_savings": 380.27,
+      "confidence": "low",
+      "reason": "2026-10 cost $1,048.65 against a trailing average of $668.38 (+57%)",
+      "recommendation": "Open Cost Explorer for this service grouped by usage type and linked account to confirm the increase is intended; set an AWS Budgets alert at the trailing average.",
+      "counted_in_total": true,
+      "details": {
+        "latest_period": "2026-10",
+        "latest": 1048.65,
+        "trailing_average": 668.38,
+        "growth_ratio": 0.569,
+        "months": 6
+      }
+    },
+    {
+      "check_id": "spend-growth",
+      "title": "Services with unexplained spend growth",
+      "resource_id": "CloudWatch",
+      "resource_type": "cost-explorer:service",
+      "region": "global",
+      "monthly_cost": 168.92,
+      "estimated_monthly_savings": 70.82,
+      "confidence": "low",
+      "reason": "2026-10 cost $168.92 against a trailing average of $98.10 (+72%)",
+      "recommendation": "Open Cost Explorer for this service grouped by usage type and linked account to confirm the increase is intended; set an AWS Budgets alert at the trailing average.",
+      "counted_in_total": true,
+      "details": {
+        "latest_period": "2026-10",
+        "latest": 168.92,
+        "trailing_average": 98.1,
+        "growth_ratio": 0.722,
+        "months": 6
+      }
+    }
+  ],
+  "pricing": {
+    "table_version": "2025-06",
+    "note": "Bundled us-east-1 list prices with a regional multiplier; estimates only."
+  },
+  "cost_report": {
+    "source": "examples/cost_explorer_by_service.csv",
+    "currency": "USD",
+    "periods": [
+      "2026-05",
+      "2026-06",
+      "2026-07",
+      "2026-08",
+      "2026-09",
+      "2026-10"
+    ],
+    "services": {
+      "EC2-Instances": [
+        4210.55,
+        4188.2,
+        4302.75,
+        4255.1,
+        4290.4,
+        4318.9
+      ],
+      "Relational Database Service": [
+        1830.0,
+        1830.0,
+        1845.2,
+        1851.75,
+        1849.9,
+        1862.3
+      ],
+      "EC2-Other": [
+        612.3,
+        640.85,
+        655.1,
+        702.45,
+        731.2,
+        1048.65
+      ],
+      "S3": [
+        388.42,
+        401.17,
+        415.66,
+        430.02,
+        446.91,
+        463.35
+      ],
+      "Elastic Load Balancing": [
+        166.44,
+        168.1,
+        171.92,
+        170.3,
+        169.88,
+        172.45
+      ],
+      "CloudWatch": [
+        92.18,
+        95.4,
+        97.11,
+        101.06,
+        104.73,
+        168.92
+      ],
+      "VPC": [
+        118.26,
+        118.26,
+        121.9,
+        121.9,
+        125.54,
+        125.54
+      ],
+      "Lambda": [
+        41.07,
+        39.88,
+        44.15,
+        46.92,
+        43.3,
+        45.61
+      ],
+      "DynamoDB": [
+        25.1,
+        26.44,
+        27.9,
+        29.12,
+        30.05,
+        31.2
+      ],
+      "Key Management Service": [
+        12.0,
+        12.0,
+        12.0,
+        12.0,
+        12.0,
+        12.0
+      ],
+      "Route 53": [
+        8.5,
+        8.5,
+        8.5,
+        8.52,
+        8.5,
+        8.51
+      ]
+    },
+    "totals": [
+      7504.82,
+      7528.8,
+      7702.19,
+      7729.14,
+      7812.41,
+      8257.43
+    ]
+  }
+}

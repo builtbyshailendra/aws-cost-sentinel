@@ -1,0 +1,374 @@
+{
+  "schema_version": 1,
+  "generated_at": "2026-11-08T09:27:27.312058+00:00",
+  "source": "live",
+  "source_detail": "moto demo account, resources back-dated 120 days",
+  "region": "us-east-1",
+  "summary": {
+    "finding_count": 12,
+    "estimated_monthly_savings": 622.01,
+    "overlapping_savings_excluded": 0.0,
+    "by_confidence": {
+      "high": 7,
+      "medium": 3,
+      "low": 2
+    },
+    "by_check": [
+      {
+        "check_id": "idle-rds",
+        "title": "Idle RDS instances",
+        "findings": 1,
+        "estimated_monthly_savings": 318.28
+      },
+      {
+        "check_id": "idle-ec2",
+        "title": "Idle EC2 instances",
+        "findings": 1,
+        "estimated_monthly_savings": 140.16
+      },
+      {
+        "check_id": "nat-gateway",
+        "title": "NAT gateway spend",
+        "findings": 1,
+        "estimated_monthly_savings": 60.75
+      },
+      {
+        "check_id": "unattached-ebs",
+        "title": "Unattached EBS volumes",
+        "findings": 1,
+        "estimated_monthly_savings": 40.0
+      },
+      {
+        "check_id": "gp2-to-gp3",
+        "title": "gp2 volumes convertible to gp3",
+        "findings": 3,
+        "estimated_monthly_savings": 22.82
+      },
+      {
+        "check_id": "idle-load-balancer",
+        "title": "Load balancers with no healthy targets",
+        "findings": 1,
+        "estimated_monthly_savings": 16.43
+      },
+      {
+        "check_id": "savings-plan",
+        "title": "Savings Plan opportunity",
+        "findings": 1,
+        "estimated_monthly_savings": 12.41
+      },
+      {
+        "check_id": "old-snapshots",
+        "title": "Old EBS snapshots",
+        "findings": 1,
+        "estimated_monthly_savings": 5.0
+      },
+      {
+        "check_id": "unused-eip",
+        "title": "Unused Elastic IPs",
+        "findings": 1,
+        "estimated_monthly_savings": 3.65
+      },
+      {
+        "check_id": "s3-lifecycle",
+        "title": "S3 buckets without lifecycle rules",
+        "findings": 1,
+        "estimated_monthly_savings": 2.52
+      }
+    ],
+    "resources": {
+      "instances": 2,
+      "volumes": 4,
+      "snapshots": 2,
+      "elastic_ips": 2,
+      "load_balancers": 1,
+      "nat_gateways": 1,
+      "db_instances": 1,
+      "buckets": 1
+    }
+  },
+  "config": {
+    "region": "us-east-1",
+    "lookback_days": 14,
+    "months": 6,
+    "ec2_cpu_threshold": 5.0,
+    "ebs_unattached_min_age_days": 7,
+    "snapshot_max_age_days": 90,
+    "snapshot_incremental_ratio": 0.5,
+    "rds_connections_threshold": 1.0,
+    "rds_cpu_threshold": 5.0,
+    "nat_idle_gb_threshold": 1.0,
+    "nat_endpoint_savings_ratio": 0.3,
+    "s3_tierable_ratio": 0.3,
+    "savings_plan_discount": 0.2,
+    "savings_plan_min_uptime_days": 30,
+    "spend_growth_threshold": 0.25,
+    "min_savings": 0.0,
+    "checks": null
+  },
+  "errors": [],
+  "skipped_checks": {
+    "spend-growth": "needs Cost Explorer data, which was not collected"
+  },
+  "findings": [
+    {
+      "check_id": "idle-rds",
+      "title": "Idle RDS instances",
+      "resource_id": "orders-staging",
+      "resource_type": "rds:db-instance",
+      "region": "us-east-1",
+      "monthly_cost": 341.28,
+      "estimated_monthly_savings": 318.28,
+      "confidence": "high",
+      "reason": "db.r6g.large postgres averaged 0.00 connections and 1.8% CPU over the last 14 days",
+      "recommendation": "Stop the instance (RDS restarts it after 7 days, so schedule it) or take a final snapshot and delete it.",
+      "counted_in_total": true,
+      "details": {
+        "instance_class": "db.r6g.large",
+        "engine": "postgres",
+        "multi_az": true,
+        "avg_connections": 0.0,
+        "avg_cpu_percent": 1.8,
+        "allocated_storage_gib": 200,
+        "storage_monthly": 23.0,
+        "age_days": 120.0,
+        "price_note": ""
+      }
+    },
+    {
+      "check_id": "idle-ec2",
+      "title": "Idle EC2 instances",
+      "resource_id": "i-da1be0f5427ec1a75",
+      "resource_type": "ec2:instance",
+      "region": "us-east-1",
+      "monthly_cost": 140.16,
+      "estimated_monthly_savings": 140.16,
+      "confidence": "high",
+      "reason": "m5.xlarge (legacy-reporting) averaged 1.3% CPU over the last 14 days (threshold 5%)",
+      "recommendation": "Stop the instance if nobody owns it, otherwise move it to a smaller type or schedule it to stop outside working hours.",
+      "counted_in_total": true,
+      "details": {
+        "instance_type": "m5.xlarge",
+        "platform": "Linux/UNIX",
+        "name": "legacy-reporting",
+        "avg_cpu_percent": 1.3,
+        "uptime_days": 120.0,
+        "hourly_price": 0.192,
+        "price_note": ""
+      }
+    },
+    {
+      "check_id": "nat-gateway",
+      "title": "NAT gateway spend",
+      "resource_id": "nat-117acd28c1e37e327",
+      "resource_type": "ec2:nat-gateway",
+      "region": "us-east-1",
+      "monthly_cost": 235.35,
+      "estimated_monthly_savings": 60.75,
+      "confidence": "low",
+      "reason": "data processing costs about $202.50 per month, more than the $32.85 hourly charge",
+      "recommendation": "Add gateway endpoints for S3 and DynamoDB (free) and interface endpoints for the AWS services that dominate the traffic, and keep cross-AZ traffic inside the AZ.",
+      "counted_in_total": true,
+      "details": {
+        "vpc_id": "vpc-1f5031db5b87f0669",
+        "subnet_id": "subnet-6c87586cbeaf7822b",
+        "gb_processed_in_window": 2100.0,
+        "hourly_charge_monthly": 32.85,
+        "processing_charge_monthly": 202.5,
+        "endpoint_savings_ratio": 0.3
+      }
+    },
+    {
+      "check_id": "unattached-ebs",
+      "title": "Unattached EBS volumes",
+      "resource_id": "vol-24d33e75d88cd1519",
+      "resource_type": "ec2:volume",
+      "region": "us-east-1",
+      "monthly_cost": 40.0,
+      "estimated_monthly_savings": 40.0,
+      "confidence": "high",
+      "reason": "500 GiB gp3 has no attachment and was created 120 days ago",
+      "recommendation": "Take a snapshot if the data matters, then delete the volume.",
+      "counted_in_total": true,
+      "details": {
+        "size_gib": 500,
+        "volume_type": "gp3",
+        "age_days": 120.0,
+        "name": ""
+      }
+    },
+    {
+      "check_id": "gp2-to-gp3",
+      "title": "gp2 volumes convertible to gp3",
+      "resource_id": "vol-0106347c991153972",
+      "resource_type": "ec2:volume",
+      "region": "us-east-1",
+      "monthly_cost": 150.0,
+      "estimated_monthly_savings": 22.5,
+      "confidence": "medium",
+      "reason": "1500 GiB gp2 costs $150.00/month; as gp3 with 4500 IOPS it costs $127.50/month",
+      "recommendation": "Run ModifyVolume to gp3 (online, no downtime) with 4500 provisioned IOPS to keep the gp2 baseline, and raise throughput above 125 MiB/s only if CloudWatch shows the volume needs it.",
+      "counted_in_total": true,
+      "details": {
+        "size_gib": 1500,
+        "gp2_monthly": 150.0,
+        "gp3_monthly": 127.5,
+        "required_iops": 4500,
+        "gp3_iops": 4500,
+        "state": "in-use"
+      }
+    },
+    {
+      "check_id": "idle-load-balancer",
+      "title": "Load balancers with no healthy targets",
+      "resource_id": "old-campaign-alb",
+      "resource_type": "elbv2:application",
+      "region": "us-east-1",
+      "monthly_cost": 16.43,
+      "estimated_monthly_savings": 16.43,
+      "confidence": "high",
+      "reason": "application load balancer has no registered targets across 1 target group(s)",
+      "recommendation": "Delete the load balancer if the service behind it is gone; otherwise fix the target group health checks.",
+      "counted_in_total": true,
+      "details": {
+        "arn": "arn:aws:elasticloadbalancing:us-east-1:123456789012:loadbalancer/app/old-campaign-alb/ba5da382f9374738",
+        "type": "application",
+        "scheme": "",
+        "age_days": 120.0,
+        "registered_targets": 0,
+        "target_groups": [
+          "old-campaign"
+        ]
+      }
+    },
+    {
+      "check_id": "savings-plan",
+      "title": "Savings Plan opportunity",
+      "resource_id": "1 steady-state instances",
+      "resource_type": "savings-plan",
+      "region": "us-east-1",
+      "monthly_cost": 62.05,
+      "estimated_monthly_savings": 12.41,
+      "confidence": "medium",
+      "reason": "1 on-demand instances have run for more than 30 days and cost about $62.05 per month; 1 idle instance(s) excluded (see idle-ec2)",
+      "recommendation": "Buy a 1-year, no-upfront Compute Savings Plan with an hourly commitment of about $0.07; it applies across instance families, sizes and regions, so the baseline can keep changing.",
+      "counted_in_total": true,
+      "details": {
+        "instances": [
+          "i-692b1a47de545fd80"
+        ],
+        "excluded_idle_instances": [
+          "i-da1be0f5427ec1a75"
+        ],
+        "unpriced_instances": [],
+        "unmodelled_licence_instances": [],
+        "on_demand_hourly": 0.085,
+        "licence_hourly": 0.0,
+        "commitment_hourly": 0.068,
+        "discount": 0.2
+      }
+    },
+    {
+      "check_id": "old-snapshots",
+      "title": "Old EBS snapshots",
+      "resource_id": "snap-c4e557ccab0065490",
+      "resource_type": "ec2:snapshot",
+      "region": "us-east-1",
+      "monthly_cost": 10.0,
+      "estimated_monthly_savings": 5.0,
+      "confidence": "medium",
+      "reason": "snapshot of 200 GiB volume vol-e134ad173bf293df6 is 120 days old and the source volume no longer exists",
+      "recommendation": "Delete it, or move it to the EBS Snapshots Archive tier (75% cheaper) if it must be kept for compliance. Use Data Lifecycle Manager to expire future snapshots automatically.",
+      "counted_in_total": true,
+      "details": {
+        "age_days": 120.0,
+        "volume_id": "vol-e134ad173bf293df6",
+        "volume_size_gib": 200,
+        "source_volume_exists": false,
+        "description": "pre-migration backup",
+        "incremental_ratio": 0.5
+      }
+    },
+    {
+      "check_id": "unused-eip",
+      "title": "Unused Elastic IPs",
+      "resource_id": "eipalloc-c515631acac1400b3",
+      "resource_type": "ec2:elastic-ip",
+      "region": "us-east-1",
+      "monthly_cost": 3.65,
+      "estimated_monthly_savings": 3.65,
+      "confidence": "high",
+      "reason": "127.122.150.55 is not associated with any resource",
+      "recommendation": "Release the address, or associate it with the resource that needs it.",
+      "counted_in_total": true,
+      "details": {
+        "public_ip": "127.122.150.55",
+        "instance_id": null,
+        "instance_state": null,
+        "network_interface_id": null
+      }
+    },
+    {
+      "check_id": "s3-lifecycle",
+      "title": "S3 buckets without lifecycle rules",
+      "resource_id": "demo-app-logs",
+      "resource_type": "s3:bucket",
+      "region": "us-east-1",
+      "monthly_cost": 18.4,
+      "estimated_monthly_savings": 2.52,
+      "confidence": "low",
+      "reason": "no lifecycle rules; 800.0 GB in Standard storage",
+      "recommendation": "Add lifecycle rules: abort incomplete multipart uploads after 7 days, transition objects to Standard-IA or Intelligent-Tiering after 30 days, and expire old noncurrent versions.",
+      "counted_in_total": true,
+      "details": {
+        "size_gb": 800.0,
+        "tierable_ratio": 0.3
+      }
+    },
+    {
+      "check_id": "gp2-to-gp3",
+      "title": "gp2 volumes convertible to gp3",
+      "resource_id": "vol-657d041bfd0fb249a",
+      "resource_type": "ec2:volume",
+      "region": "us-east-1",
+      "monthly_cost": 0.8,
+      "estimated_monthly_savings": 0.16,
+      "confidence": "high",
+      "reason": "8 GiB gp2 costs $0.80/month; as gp3 with 3000 IOPS it costs $0.64/month",
+      "recommendation": "Run ModifyVolume to gp3 (online, no downtime); the included 3000 IOPS and 125 MiB/s already exceed the gp2 baseline of 100 IOPS.",
+      "counted_in_total": true,
+      "details": {
+        "size_gib": 8,
+        "gp2_monthly": 0.8,
+        "gp3_monthly": 0.64,
+        "required_iops": 100,
+        "gp3_iops": 3000,
+        "state": "in-use"
+      }
+    },
+    {
+      "check_id": "gp2-to-gp3",
+      "title": "gp2 volumes convertible to gp3",
+      "resource_id": "vol-4a1afd20623d0039d",
+      "resource_type": "ec2:volume",
+      "region": "us-east-1",
+      "monthly_cost": 0.8,
+      "estimated_monthly_savings": 0.16,
+      "confidence": "high",
+      "reason": "8 GiB gp2 costs $0.80/month; as gp3 with 3000 IOPS it costs $0.64/month",
+      "recommendation": "Run ModifyVolume to gp3 (online, no downtime); the included 3000 IOPS and 125 MiB/s already exceed the gp2 baseline of 100 IOPS.",
+      "counted_in_total": true,
+      "details": {
+        "size_gib": 8,
+        "gp2_monthly": 0.8,
+        "gp3_monthly": 0.64,
+        "required_iops": 100,
+        "gp3_iops": 3000,
+        "state": "in-use"
+      }
+    }
+  ],
+  "pricing": {
+    "table_version": "2025-06",
+    "note": "Bundled us-east-1 list prices with a regional multiplier; estimates only."
+  }
+}

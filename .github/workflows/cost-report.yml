@@ -1,0 +1,28 @@
+# Dogfoods the action: analyses the bundled (synthetic) Cost Explorer export on every
+# push to main, writing the report to the job summary and an artifact, and posts it as
+# a PR comment on pull requests. To scan a real account, see action/README.md
+# (OIDC role + mode: scan).
+name: Cost report
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  cost-report:
+    runs-on: ubuntu-latest
+    # Forks get a read-only token and cannot comment.
+    if: >-
+      github.event_name == 'push' ||
+      github.event.pull_request.head.repo.full_name == github.repository
+    steps:
+      - uses: actions/checkout@v5
+      - uses: ./action
+        with:
+          mode: csv
+          csv: examples/cost_explorer_by_service.csv

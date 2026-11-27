@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AWS Cost Sentinel report</title>
+<style>
+:root { --bg: #ffffff; --fg: #1f2933; --muted: #52606d; --line: #e4e7eb; --accent: #0b6e4f;
+        --high: #c0392b; --medium: #b9770e; --low: #5d6d7e; --card: #f5f7fa; }
+@media (prefers-color-scheme: dark) {
+  :root { --bg: #111418; --fg: #e6e8eb; --muted: #9aa5b1; --line: #2b313a; --accent: #4cc38a;
+          --high: #ff6b5b; --medium: #f2b134; --low: #9aa5b1; --card: #1a1f26; }
+}
+* { box-sizing: border-box; }
+body { margin: 0; padding: 24px 16px; background: var(--bg); color: var(--fg);
+       font: 15px/1.5 -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+main { max-width: 1100px; margin: 0 auto; }
+h1 { font-size: 1.6rem; margin: 0 0 4px; }
+h2 { font-size: 1.2rem; margin: 32px 0 8px; border-bottom: 1px solid var(--line);
+     padding-bottom: 4px; }
+h3 { font-size: 1.05rem; margin: 24px 0 8px; }
+.meta { color: var(--muted); font-size: 0.9rem; }
+.hero { background: var(--card); border: 1px solid var(--line); border-radius: 8px;
+        padding: 16px 20px; margin: 16px 0 8px; }
+.hero strong { font-size: 1.7rem; color: var(--accent); }
+table { width: 100%; border-collapse: collapse; margin: 8px 0 16px; font-size: 0.92rem; }
+th, td { border-bottom: 1px solid var(--line); padding: 6px 8px; text-align: left;
+         vertical-align: top; }
+th { color: var(--muted); font-weight: 600; }
+td.num, th.num { text-align: right; white-space: nowrap; }
+code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 0.88em; }
+.badge { display: inline-block; padding: 1px 8px; border-radius: 10px; font-size: 0.8rem;
+         color: #fff; }
+.badge.high { background: var(--high); } .badge.medium { background: var(--medium); }
+.badge.low { background: var(--low); }
+ul.notes { color: var(--muted); font-size: 0.9rem; }
+@media (max-width: 700px) { table { display: block; overflow-x: auto; } }
+</style></head><body><main>
+<h1>AWS Cost Sentinel report</h1>
+<p class="meta">Generated 2026-11-08 09:26 UTC &middot; region <code>global</code> &middot; source csv (examples/cost_explorer_by_service.csv)</p>
+<div class="hero">Estimated monthly savings <strong>$1,302.11</strong><br>3 finding(s): 0 high, 1 medium, 2 low confidence</div>
+<h2>Summary by check</h2>
+<table><thead><tr><th>Check</th><th class="num">Findings</th><th class="num">Est. monthly savings</th></tr></thead><tbody>
+<tr><td>Savings Plan opportunity <code>savings-plan</code></td><td class="num">1</td><td class="num">$851.02</td></tr>
+<tr><td>Services with unexplained spend growth <code>spend-growth</code></td><td class="num">2</td><td class="num">$451.09</td></tr>
+</tbody></table><h2>Findings</h2>
+<h3>Savings Plan opportunity ($851.02/month)</h3>
+<table><thead><tr><th>Resource</th><th>Region</th><th class="num">Monthly cost</th><th class="num">Savings</th><th>Confidence</th><th>Why</th><th>Recommendation</th></tr></thead><tbody>
+<tr><td><code>EC2-Instances</code></td><td>global</td><td class="num">$4,255.10</td><td class="num">$851.02</td><td><span class="badge medium">medium</span></td><td>EC2-Instances spend never dropped below $4,255.10 per month over the last 3 months, which looks like steady on-demand usage</td><td>Check Cost Explorer&#x27;s Savings Plans recommendations and commit to the baseline with a 1-year, no-upfront Compute Savings Plan.</td></tr>
+</tbody></table>
+<h3>Services with unexplained spend growth ($451.09/month)</h3>
+<table><thead><tr><th>Resource</th><th>Region</th><th class="num">Monthly cost</th><th class="num">Savings</th><th>Confidence</th><th>Why</th><th>Recommendation</th></tr></thead><tbody>
+<tr><td><code>EC2-Other</code></td><td>global</td><td class="num">$1,048.65</td><td class="num">$380.27</td><td><span class="badge low">low</span></td><td>2026-10 cost $1,048.65 against a trailing average of $668.38 (+57%)</td><td>Open Cost Explorer for this service grouped by usage type and linked account to confirm the increase is intended; set an AWS Budgets alert at the trailing average.</td></tr>
+<tr><td><code>CloudWatch</code></td><td>global</td><td class="num">$168.92</td><td class="num">$70.82</td><td><span class="badge low">low</span></td><td>2026-10 cost $168.92 against a trailing average of $98.10 (+72%)</td><td>Open Cost Explorer for this service grouped by usage type and linked account to confirm the increase is intended; set an AWS Budgets alert at the trailing average.</td></tr>
+</tbody></table>
+<h2>Spend by service (2026-05 to 2026-10)</h2>
+<table><thead><tr><th>Service</th><th class="num">2026-10</th><th class="num">Avg of earlier months</th><th class="num">Trend</th><th class="num">Total</th></tr></thead><tbody>
+<tr><td>EC2-Instances</td><td class="num">$4,318.90</td><td class="num">$4,249.40</td><td class="num">+2%</td><td class="num">$25,565.90</td></tr>
+<tr><td>Relational Database Service</td><td class="num">$1,862.30</td><td class="num">$1,841.37</td><td class="num">+1%</td><td class="num">$11,069.15</td></tr>
+<tr><td>EC2-Other</td><td class="num">$1,048.65</td><td class="num">$668.38</td><td class="num">+57%</td><td class="num">$4,390.55</td></tr>
+<tr><td>S3</td><td class="num">$463.35</td><td class="num">$416.44</td><td class="num">+11%</td><td class="num">$2,545.53</td></tr>
+<tr><td>Elastic Load Balancing</td><td class="num">$172.45</td><td class="num">$169.33</td><td class="num">+2%</td><td class="num">$1,019.09</td></tr>
+<tr><td>VPC</td><td class="num">$125.54</td><td class="num">$121.17</td><td class="num">+4%</td><td class="num">$731.40</td></tr>
+<tr><td>CloudWatch</td><td class="num">$168.92</td><td class="num">$98.10</td><td class="num">+72%</td><td class="num">$659.40</td></tr>
+<tr><td>Lambda</td><td class="num">$45.61</td><td class="num">$43.06</td><td class="num">+6%</td><td class="num">$260.93</td></tr>
+<tr><td>DynamoDB</td><td class="num">$31.20</td><td class="num">$27.72</td><td class="num">+13%</td><td class="num">$169.81</td></tr>
+<tr><td>Key Management Service</td><td class="num">$12.00</td><td class="num">$12.00</td><td class="num">+0%</td><td class="num">$72.00</td></tr>
+<tr><th>All services</th><th class="num">$8,257.43</th><th class="num">$7,655.47</th><th></th><th class="num">$46,534.79</th></tr>
+</tbody></table>
+<h2>Notes</h2><ul class="notes">
+<li>Prices come from the bundled table (version 2025-06, us-east-1 list prices with a regional multiplier). Treat every figure as an estimate.</li>
+<li>A Cost Explorer export has no resource ids, so only the savings-plan and spend-growth checks run; use &#x27;cost-sentinel scan&#x27; for resource-level findings.</li>
+<li>The total counts each resource once: when several checks flag the same resource, only the largest saving is added, and the Savings Plan baseline leaves out idle instances.</li>
+<li>Confidence reflects how likely the saving is real, not how precise the number is.</li>
+</ul></main></body></html>

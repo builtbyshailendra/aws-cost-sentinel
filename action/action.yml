@@ -1,0 +1,161 @@
+name: AWS Cost Sentinel
+description: >-
+  Scan an AWS account (or a Cost Explorer CSV export) for cost waste and post the
+  Markdown report as a pull request comment.
+author: Shailendra Singh
+branding:
+  icon: dollar-sign
+  color: green
+
+inputs:
+  mode:
+    description: "'scan' for a live boto3 scan, 'csv' to analyse a Cost Explorer export."
+    required: false
+    default: scan
+  csv:
+    description: Path to the Cost Explorer CSV export (required when mode is 'csv').
+    required: false
+    default: ""
+  aws-region:
+    description: Region to scan in 'scan' mode. Credentials must already be configured.
+    required: false
+    default: us-east-1
+  checks:
+    description: Comma-separated check ids to run (default is every check).
+    required: false
+    default: ""
+  min-savings:
+    description: Drop findings that save less than this many dollars per month.
+    required: false
+    default: "0"
+  lookback-days:
+    description: CloudWatch lookback window in days ('scan' mode).
+    required: false
+    default: "14"
+  no-cost-explorer:
+    description: "Set to 'true' to skip Cost Explorer GetCostAndUsage calls ('scan' mode)."
+    required: false
+    default: "false"
+  strict:
+    description: "Set to 'true' to fail when any single service cannot be collected ('scan' mode). A scan that collects nothing always fails."
+    required: false
+    default: "false"
+  fail-above:
+    description: "Fail the job when estimated monthly savings exceed this many dollars (empty disables the gate)."
+    required: false
+    default: ""
+  comment:
+    description: "Post or update the report as a pull request comment ('true' or 'false')."
+    required: false
+    default: "true"
+  upload-artifact:
+    description: "Upload the Markdown, HTML and JSON reports as a workflow artifact ('true' or 'false')."
+    required: false
+    default: "true"
+  github-token:
+    description: "Token used to comment; needs the 'pull-requests: write' permission."
+    required: false
+    default: ${{ github.token }}
+  python-version:
+    description: Python version used to run the scanner.
+    required: false
+    default: "3.12"
+
+outputs:
+  report-path:
+    description: Path of the Markdown report.
+    value: ${{ steps.run.outputs.report-path }}
+  exit-code:
+    description: Exit code of the scan (0 ok, 1 error, 2 invalid inputs, 3 savings above fail-above).
+    value: ${{ steps.run.outputs.exit-code }}
+
+runs:
+  using: composite
+  steps:
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ inputs.python-version }}
+
+    - name: Install aws-cost-sentinel
+      shell: bash
+      run: python -m pip install --disable-pip-version-check --quiet "${GITHUB_ACTION_PATH}/.."
+
+    - name: Run cost-sentinel
+      id: run
+      shell: bash
+      env:
+        INPUT_MODE: ${{ inputs.mode }}
+        INPUT_CSV: ${{ inputs.csv }}
+        INPUT_REGION: ${{ inputs.aws-region }}
+        INPUT_CHECKS: ${{ inputs.checks }}
+        INPUT_MIN_SAVINGS: ${{ inputs.min-savings }}
+        INPUT_LOOKBACK_DAYS: ${{ inputs.lookback-days }}
+        INPUT_NO_CE: ${{ inputs.no-cost-explorer }}
+        INPUT_STRICT: ${{ inputs.strict }}
+        INPUT_FAIL_ABOVE: ${{ inputs.fail-above }}
+      run: |
+        set -uo pipefail
+        out="${RUNNER_TEMP}/cost-sentinel"
+        mkdir -p "$out"
+        if [ "$INPUT_MODE" = "csv" ]; then
+          if [ -z "$INPUT_CSV" ]; then
+            echo "::error::the 'csv' input is required when mode is 'csv'"
+            exit 1
+          fi
+          cmd=(cost-sentinel report --csv "$INPUT_CSV")
+        elif [ "$INPUT_MODE" = "scan" ]; then
+          cmd=(cost-sentinel scan --region "$INPUT_REGION" --lookback-days "$INPUT_LOOKBACK_DAYS")
+          if [ "$INPUT_NO_CE" = "true" ]; then cmd+=(--no-cost-explorer); fi
+          if [ "$INPUT_STRICT" = "true" ]; then cmd+=(--strict); fi
+        else
+          echo "::error::mode must be 'scan' or 'csv', got '$INPUT_MODE'"
+          exit 1
+        fi
+        cmd+=(--min-savings "$INPUT_MIN_SAVINGS")
+        if [ -n "$INPUT_CHECKS" ]; then cmd+=(--checks "$INPUT_CHECKS"); fi
+
+        # The Markdown report is what gets posted; the savings gate is evaluated on this run.
+        gate=()
+        if [ -n "$INPUT_FAIL_ABOVE" ]; then gate=(--fail-above "$INPUT_FAIL_ABOVE"); fi
+        "${cmd[@]}" "${gate[@]}" --format markdown --output "$out/report.md"
+        code=$?
+        echo "exit-code=$code" >> "$GITHUB_OUTPUT"
+        echo "report-path=$out/report.md" >> "$GITHUB_OUTPUT"
+        # Only 0 (report written) and 3 (report written, gate tripped) are successes.
+        # Anything else, including a scan that could not collect data, fails the job
+        # so a broken role can never post a clean report.
+        if { [ "$code" -ne 0 ] && [ "$code" -ne 3 ]; } || [ ! -f "$out/report.md" ]; then
+          echo "::error::cost-sentinel failed with exit code $code; see the log above"
+          exit 1
+        fi
+        if [ "$INPUT_MODE" = "csv" ]; then
+          # CSV mode is free to re-run, so also keep HTML and JSON copies.
+          "${cmd[@]}" --format html --output "$out/report.html" || true
+          "${cmd[@]}" --format json --output "$out/report.json" || true
+        fi
+        cat "$out/report.md" >> "$GITHUB_STEP_SUMMARY"
+
+    - name: Comment on the pull request
+      if: >-
+        inputs.comment == 'true' &&
+        (github.event_name == 'pull_request' || github.event_name == 'pull_request_target')
+      shell: bash
+      env:
+        GITHUB_TOKEN: ${{ inputs.github-token }}
+      run: cost-sentinel comment --file "${{ steps.run.outputs.report-path }}"
+
+    - name: Upload reports
+      if: inputs.upload-artifact == 'true'
+      uses: actions/upload-artifact@v4
+      with:
+        name: cost-sentinel-report
+        path: ${{ runner.temp }}/cost-sentinel/
+        if-no-files-found: ignore
+
+    - name: Enforce the savings gate
+      if: steps.run.outputs.exit-code == '3'
+      shell: bash
+      run: |
+        echo "::error::estimated monthly savings exceed fail-above (${{ inputs.fail-above }})"
+        exit 1

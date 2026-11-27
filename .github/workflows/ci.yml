@@ -1,0 +1,76 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+      - name: Install ruff
+        run: python -m pip install --disable-pip-version-check ruff==0.17.6
+      - name: Ruff lint
+        run: ruff check .
+      - name: Ruff format check
+        run: ruff format --check .
+
+  test:
+    needs: lint
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        python-version: ["3.12"]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: ${{ matrix.python-version }}
+      # Exact versions for CI; pyproject.toml keeps open ranges for users.
+      - name: Install
+        shell: bash
+        run: |
+          python -m pip install --disable-pip-version-check -e . \
+            "boto3==1.44.12" "pytest==9.2.0" "pytest-cov==7.1.0" \
+            "moto[ec2,s3,rds,elbv2,cloudwatch]==5.2.6" "pyyaml==6.0.4"
+      - name: Test
+        shell: bash
+        run: |
+          python -m pytest -q --cov=cost_sentinel --cov-report=term-missing \
+            --cov-report=xml:coverage-${{ matrix.os }}.xml
+      - name: CLI smoke test
+        shell: bash
+        run: |
+          python -m cost_sentinel report --csv examples/cost_explorer_by_service.csv > /dev/null
+          python -m cost_sentinel report --csv examples/cost_explorer_by_month.csv --format json > /dev/null
+      - name: moto demo scan
+        shell: bash
+        run: |
+          python scripts/demo_moto_scan.py | grep -F 'Estimated monthly savings: $622.01'
+      - name: Upload coverage
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-${{ matrix.os }}-py${{ matrix.python-version }}
+          path: coverage-${{ matrix.os }}.xml
+
+  docker:
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - name: Build image
+        run: docker build -t aws-cost-sentinel:ci .
+      - name: Run the CSV report inside the image
+        run: |
+          docker run --rm -v "$PWD/examples:/data:ro" aws-cost-sentinel:ci \
+            report --csv /data/cost_explorer_by_service.csv

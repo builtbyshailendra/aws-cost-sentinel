@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AWS Cost Sentinel report</title>
+<style>
+:root { --bg: #ffffff; --fg: #1f2933; --muted: #52606d; --line: #e4e7eb; --accent: #0b6e4f;
+        --high: #c0392b; --medium: #b9770e; --low: #5d6d7e; --card: #f5f7fa; }
+@media (prefers-color-scheme: dark) {
+  :root { --bg: #111418; --fg: #e6e8eb; --muted: #9aa5b1; --line: #2b313a; --accent: #4cc38a;
+          --high: #ff6b5b; --medium: #f2b134; --low: #9aa5b1; --card: #1a1f26; }
+}
+* { box-sizing: border-box; }
+body { margin: 0; padding: 24px 16px; background: var(--bg); color: var(--fg);
+       font: 15px/1.5 -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+main { max-width: 1100px; margin: 0 auto; }
+h1 { font-size: 1.6rem; margin: 0 0 4px; }
+h2 { font-size: 1.2rem; margin: 32px 0 8px; border-bottom: 1px solid var(--line);
+     padding-bottom: 4px; }
+h3 { font-size: 1.05rem; margin: 24px 0 8px; }
+.meta { color: var(--muted); font-size: 0.9rem; }
+.hero { background: var(--card); border: 1px solid var(--line); border-radius: 8px;
+        padding: 16px 20px; margin: 16px 0 8px; }
+.hero strong { font-size: 1.7rem; color: var(--accent); }
+table { width: 100%; border-collapse: collapse; margin: 8px 0 16px; font-size: 0.92rem; }
+th, td { border-bottom: 1px solid var(--line); padding: 6px 8px; text-align: left;
+         vertical-align: top; }
+th { color: var(--muted); font-weight: 600; }
+td.num, th.num { text-align: right; white-space: nowrap; }
+code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 0.88em; }
+.badge { display: inline-block; padding: 1px 8px; border-radius: 10px; font-size: 0.8rem;
+         color: #fff; }
+.badge.high { background: var(--high); } .badge.medium { background: var(--medium); }
+.badge.low { background: var(--low); }
+ul.notes { color: var(--muted); font-size: 0.9rem; }
+@media (max-width: 700px) { table { display: block; overflow-x: auto; } }
+</style></head><body><main>
+<h1>AWS Cost Sentinel report</h1>
+<p class="meta">Generated 2026-11-08 09:27 UTC &middot; region <code>us-east-1</code> &middot; source live (moto demo account, resources back-dated 120 days)</p>
+<div class="hero">Estimated monthly savings <strong>$622.01</strong><br>12 finding(s): 7 high, 3 medium, 2 low confidence</div>
+<h2>Summary by check</h2>
+<table><thead><tr><th>Check</th><th class="num">Findings</th><th class="num">Est. monthly savings</th></tr></thead><tbody>
+<tr><td>Idle RDS instances <code>idle-rds</code></td><td class="num">1</td><td class="num">$318.28</td></tr>
+<tr><td>Idle EC2 instances <code>idle-ec2</code></td><td class="num">1</td><td class="num">$140.16</td></tr>
+<tr><td>NAT gateway spend <code>nat-gateway</code></td><td class="num">1</td><td class="num">$60.75</td></tr>
+<tr><td>Unattached EBS volumes <code>unattached-ebs</code></td><td class="num">1</td><td class="num">$40.00</td></tr>
+<tr><td>gp2 volumes convertible to gp3 <code>gp2-to-gp3</code></td><td class="num">3</td><td class="num">$22.82</td></tr>
+<tr><td>Load balancers with no healthy targets <code>idle-load-balancer</code></td><td class="num">1</td><td class="num">$16.43</td></tr>
+<tr><td>Savings Plan opportunity <code>savings-plan</code></td><td class="num">1</td><td class="num">$12.41</td></tr>
+<tr><td>Old EBS snapshots <code>old-snapshots</code></td><td class="num">1</td><td class="num">$5.00</td></tr>
+<tr><td>Unused Elastic IPs <code>unused-eip</code></td><td class="num">1</td><td class="num">$3.65</td></tr>
+<tr><td>S3 buckets without lifecycle rules <code>s3-lifecycle</code></td><td class="num">1</td><td class="num">$2.52</td></tr>
+</tbody></table><h2>Findings</h2>
+<h3>Idle RDS instances ($318.28/month)</h3>
+<table><thead><tr><th>Resource</th><th>Region</th><th class="num">Monthly cost</th><th class="num">Savings</th><th>Confidence</th><th>Why</th><th>Recommendation</th></tr></thead><tbody>
+<tr><td><code>orders-staging</code></td><td>us-east-1</td><td class="num">$341.28</td><td class="num">$318.28</td><td><span class="badge high">high</span></td><td>db.r6g.large postgres averaged 0.00 connections and 1.8% CPU over the last 14 days</td><td>Stop the instance (RDS restarts it after 7 days, so schedule it) or take a final snapshot and delete it.</td></tr>
+</tbody></table>
+<h3>Idle EC2 instances ($140.16/month)</h3>
+<table><thead><tr><th>Resource</th><th>Region</th><th class="num">Monthly cost</th><th class="num">Savings</th><th>Confidence</th><th>Why</th><th>Recommendation</th></tr></thead><tbody>
+<tr><td><code>i-2be9ab53b909909bd</code></td><td>us-east-1</td><td class="num">$140.16</td><td class="num">$140.16</td><td><span class="badge high">high</span></td><td>m5.xlarge (legacy-reporting) averaged 1.3% CPU over the last 14 days (threshold 5%)</td><td>Stop the instance if nobody owns it, otherwise move it to a smaller type or schedule it to stop outside working hours.</td></tr>
+</tbody></table>
+<h3>NAT gateway spend ($60.75/month)</h3>
+<table><thead><tr><th>Resource</th><th>Region</th><th class="num">Monthly cost</th><th class="num">Savings</th><th>Confidence</th><th>Why</th><th>Recommendation</th></tr></thead><tbody>
+<tr><td><code>nat-5d4459fcbfc517cee</code></td><td>us-east-1</td><td class="num">$235.35</td><td class="num">$60.75</td><td><span class="badge low">low</span></td><td>data processing costs about $202.50 per month, more than the $32.85 hourly charge</td><td>Add gateway endpoints for S3 and DynamoDB (free) and interface endpoints for the AWS services that dominate the traffic, and keep cross-AZ traffic inside the AZ.</td></tr>
+</tbody></table>
+<h3>Unattached EBS volumes ($40.00/month)</h3>
+<table><thead><tr><th>Resource</th><th>Region</th><th class="num">Monthly cost</th><th class="num">Savings</th><th>Confidence</th><th>Why</th><th>Recommendation</th></tr></thead><tbody>
+<tr><td><code>vol-d1f6eb2c1685c6b59</code></td><td>us-east-1</td><td class="num">$40.00</td><td class="num">$40.00</td><td><span class="badge high">high</span></td><td>500 GiB gp3 has no attachment and was created 120 days ago</td><td>Take a snapshot if the data matters, then delete the volume.</td></tr>
+</tbody></table>
+<h3>gp2 volumes convertible to gp3 ($22.82/month)</h3>
+<table><thead><tr><th>Resource</th><th>Region</th><th class="num">Monthly cost</th><th class="num">Savings</th><th>Confidence</th><th>Why</th><th>Recommendation</th></tr></thead><tbody>
+<tr><td><code>vol-09661d6a096d44866</code></td><td>us-east-1</td><td class="num">$150.00</td><td class="num">$22.50</td><td><span class="badge medium">medium</span></td><td>1500 GiB gp2 costs $150.00/month; as gp3 with 4500 IOPS it costs $127.50/month</td><td>Run ModifyVolume to gp3 (online, no downtime) with 4500 provisioned IOPS to keep the gp2 baseline, and raise throughput above 125 MiB/s only if CloudWatch shows the volume needs it.</td></tr>
+<tr><td><code>vol-b7d3d9b5b173ee350</code></td><td>us-east-1</td><td class="num">$0.80</td><td class="num">$0.16</td><td><span class="badge high">high</span></td><td>8 GiB gp2 costs $0.80/month; as gp3 with 3000 IOPS it costs $0.64/month</td><td>Run ModifyVolume to gp3 (online, no downtime); the included 3000 IOPS and 125 MiB/s already exceed the gp2 baseline of 100 IOPS.</td></tr>
+<tr><td><code>vol-6b1d55fb60718c985</code></td><td>us-east-1</td><td class="num">$0.80</td><td class="num">$0.16</td><td><span class="badge high">high</span></td><td>8 GiB gp2 costs $0.80/month; as gp3 with 3000 IOPS it costs $0.64/month</td><td>Run ModifyVolume to gp3 (online, no downtime); the included 3000 IOPS and 125 MiB/s already exceed the gp2 baseline of 100 IOPS.</td></tr>
+</tbody></table>
+<h3>Load balancers with no healthy targets ($16.43/month)</h3>
+<table><thead><tr><th>Resource</th><th>Region</th><th class="num">Monthly cost</th><th class="num">Savings</th><th>Confidence</th><th>Why</th><th>Recommendation</th></tr></thead><tbody>
+<tr><td><code>old-campaign-alb</code></td><td>us-east-1</td><td class="num">$16.43</td><td class="num">$16.43</td><td><span class="badge high">high</span></td><td>application load balancer has no registered targets across 1 target group(s)</td><td>Delete the load balancer if the service behind it is gone; otherwise fix the target group health checks.</td></tr>
+</tbody></table>
+<h3>Savings Plan opportunity ($12.41/month)</h3>
+<table><thead><tr><th>Resource</th><th>Region</th><th class="num">Monthly cost</th><th class="num">Savings</th><th>Confidence</th><th>Why</th><th>Recommendation</th></tr></thead><tbody>
+<tr><td><code>1 steady-state instances</code></td><td>us-east-1</td><td class="num">$62.05</td><td class="num">$12.41</td><td><span class="badge medium">medium</span></td><td>1 on-demand instances have run for more than 30 days and cost about $62.05 per month; 1 idle instance(s) excluded (see idle-ec2)</td><td>Buy a 1-year, no-upfront Compute Savings Plan with an hourly commitment of about $0.07; it applies across instance families, sizes and regions, so the baseline can keep changing.</td></tr>
+</tbody></table>
+<h3>Old EBS snapshots ($5.00/month)</h3>
+<table><thead><tr><th>Resource</th><th>Region</th><th class="num">Monthly cost</th><th class="num">Savings</th><th>Confidence</th><th>Why</th><th>Recommendation</th></tr></thead><tbody>
+<tr><td><code>snap-4a9244e2896030d91</code></td><td>us-east-1</td><td class="num">$10.00</td><td class="num">$5.00</td><td><span class="badge medium">medium</span></td><td>snapshot of 200 GiB volume vol-e3d64a7781107ccd4 is 120 days old and the source volume no longer exists</td><td>Delete it, or move it to the EBS Snapshots Archive tier (75% cheaper) if it must be kept for compliance. Use Data Lifecycle Manager to expire future snapshots automatically.</td></tr>
+</tbody></table>
+<h3>Unused Elastic IPs ($3.65/month)</h3>
+<table><thead><tr><th>Resource</th><th>Region</th><th class="num">Monthly cost</th><th class="num">Savings</th><th>Confidence</th><th>Why</th><th>Recommendation</th></tr></thead><tbody>
+<tr><td><code>eipalloc-5fbc06ddc4c634aa0</code></td><td>us-east-1</td><td class="num">$3.65</td><td class="num">$3.65</td><td><span class="badge high">high</span></td><td>127.52.12.28 is not associated with any resource</td><td>Release the address, or associate it with the resource that needs it.</td></tr>
+</tbody></table>
+<h3>S3 buckets without lifecycle rules ($2.52/month)</h3>
+<table><thead><tr><th>Resource</th><th>Region</th><th class="num">Monthly cost</th><th class="num">Savings</th><th>Confidence</th><th>Why</th><th>Recommendation</th></tr></thead><tbody>
+<tr><td><code>demo-app-logs</code></td><td>us-east-1</td><td class="num">$18.40</td><td class="num">$2.52</td><td><span class="badge low">low</span></td><td>no lifecycle rules; 800.0 GB in Standard storage</td><td>Add lifecycle rules: abort incomplete multipart uploads after 7 days, transition objects to Standard-IA or Intelligent-Tiering after 30 days, and expire old noncurrent versions.</td></tr>
+</tbody></table>
+<h2>Resources scanned</h2><p>
+2 instances, 4 volumes, 2 snapshots, 2 elastic ips, 1 load balancers, 1 nat gateways, 1 db instances, 1 buckets
+</p>
+<h2>Notes</h2><ul class="notes">
+<li>Prices come from the bundled table (version 2025-06, us-east-1 list prices with a regional multiplier). Treat every figure as an estimate.</li>
+<li>CloudWatch lookback: 14 days; EC2 idle CPU threshold: 5%; snapshot max age: 90 days.</li>
+<li>The total counts each resource once: when several checks flag the same resource, only the largest saving is added, and the Savings Plan baseline leaves out idle instances.</li>
+<li>Checks not run: spend-growth (needs Cost Explorer data, which was not collected).</li>
+<li>Confidence reflects how likely the saving is real, not how precise the number is.</li>
+</ul></main></body></html>
